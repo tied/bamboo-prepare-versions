@@ -9,16 +9,32 @@
 
     <!-- add our i18n resource -->
     <resource type="i18n" name="i18n" location="prepare-versions"/>
-    
+
     <!-- add our web resources -->
     <web-resource key="prepare-versions-resources" name="prepare-versions Web Resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
-        
+
         <resource type="download" name="prepare-versions.css" location="/css/prepare-versions.css"/>
         <resource type="download" name="prepare-versions.js" location="/js/prepare-versions.js"/>
         <resource type="download" name="images/" location="/images"/>
 
         <context>prepare-versions</context>
     </web-resource>
-    
+
+    <web-item key="prepare-versions-menu-item" name="Prepare Versions" section="header.global.primary">
+        <label key="Versions"/>
+        <link>/prepareVersionsForm.action</link>
+    </web-item>
+
+    <xwork key="prepare-versions-form" name="Prepare Versions Form">
+        <package name="prepareVersionsPlugin" extends="default">
+            <action name="prepareVersionsForm" class="com.github.bayaro.PrepareVersionsForm" method="default">
+                <result name="success" type="freemarker">/prepareVersionsForm.ftl</result>
+            </action>
+        </package>
+    </xwork>
+
+    <!-- import from the product container -->
+    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
+
 </atlassian-plugin>
