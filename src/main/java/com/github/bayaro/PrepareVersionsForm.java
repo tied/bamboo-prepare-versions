@@ -17,6 +17,9 @@ import java.io.*;
 import java.net.*;
 import java.util.regex.*;
 
+import com.atlassian.bamboo.bandana.PlanAwareBandanaContext;
+import com.atlassian.bandana.BandanaManager;
+
 public class PrepareVersionsForm extends BambooActionSupport {
 
     private final EnvironmentService environmentService;
@@ -32,6 +35,8 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private Pattern patternRpm = Pattern.compile( "^<a href=\"([^\"]*)-([^\"-]*)-([^\"-]*)\\.x86_64\\.rpm\">.*" );
     private Pattern patternBranch = Pattern.compile( "^([^\\.]*)\\.([0-9a-f]*)$" );
     private Pattern patternInVersions = Pattern.compile( "^\\s*([^:]*):\\s*([^-]*)-([^\\s#$]*)[\\s#$].*" );
+
+    private BandanaManager bandanaManager;
 
     @Nullable
     @Override
@@ -52,8 +57,10 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
     public PrepareVersionsForm(
         final AdministrationConfigurationAccessor configurationAccessor,
-        final EnvironmentService environmentService
+        final EnvironmentService environmentService,
+        final BandanaManager bandanaManager
     ) {
+        this.bandanaManager = bandanaManager;
         this.environmentService = environmentService;
         this.baseUrl = configurationAccessor.getAdministrationConfiguration().getBaseUrl();
     }
@@ -104,14 +111,21 @@ public class PrepareVersionsForm extends BambooActionSupport {
         return buildsList;
     }
 
-    private List<String> loadURL( String uri ) {
+    static public List<String> loadURL( String path, String storageUrl, String storageUsr, String storagePwd ) {
         final List<String> list = new ArrayList<>();
         BufferedReader reader = null;
 
         try {
-            // TODO
-            String basicAuth = "Basic " + new String( Base64.getEncoder().encode( userpass.getBytes() ));
-            uc.setRequestProperty ( "Authorization", basicAuth );
+            URL url = new URL( storageUrl + path );
+            URLConnection uc = url.openConnection();
+            if ( storageUsr != null && storageUsr != "" ) {
+                String userpass = storageUsr;
+                if ( storagePwd != null && storagePwd != "" ) {
+                    userpass = userpass + ":" + storagePwd;
+                }
+                String basicAuth = "Basic " + new String( Base64.getEncoder().encode( userpass.getBytes() ));
+                uc.setRequestProperty ( "Authorization", basicAuth );
+            }
             reader = new BufferedReader( new InputStreamReader( uc.getInputStream() ) );
             String line;
 
@@ -119,18 +133,25 @@ public class PrepareVersionsForm extends BambooActionSupport {
                 list.add( line );
             }
         } catch ( FileNotFoundException e ) {
-                e.printStackTrace();
+            list.add( "ERROR" );
+            list.add( e.toString() );
         } catch ( IOException e ) {
-                e.printStackTrace();
+            list.add( "ERROR" );
+            list.add( e.toString() );
         } finally {
             try {
-                if ( reader != null ) {
-                    reader.close();
-                }
+                if ( reader != null ) { reader.close(); }
             } catch ( IOException e ) {}
         }
-
         return list;
+    }
+
+    private List<String> loadURL( String path ) {
+        return loadURL( path,
+            String.valueOf( bandanaManager.getValue( PlanAwareBandanaContext.GLOBAL_CONTEXT, ConfigurePluginAction.BANDANA_KEY_STORAGE_URL ) ),
+            String.valueOf( bandanaManager.getValue( PlanAwareBandanaContext.GLOBAL_CONTEXT, ConfigurePluginAction.BANDANA_KEY_STORAGE_USR ) ),
+            String.valueOf( bandanaManager.getValue( PlanAwareBandanaContext.GLOBAL_CONTEXT, ConfigurePluginAction.BANDANA_KEY_STORAGE_PWD ) )
+        );
     }
 
     private KnownEnvironmentBuilds getAllKnownBuilds() {
@@ -177,7 +198,8 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private Map<String, List<String>> getAllDeployedVersions( List<String> environments ) {
         final Map<String, List<String>> map = new TreeMap<>();
 
-        for (String envName : environments) {
+        //for (String envName : environments) {
+        for (String envName : Arrays.asList( "dev1", "dev2", "dev3" , "stb", "prod" ) ) {
             loadDeployedVersions( envName, "/" + envName + "/versions.yaml.txt", map, "+" );
             loadDeployedVersions( envName, "/" + envName + "/versions.yaml.txt.started.txt", map, "?" );
         }

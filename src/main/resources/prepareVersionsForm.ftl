@@ -2,7 +2,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
 
 <div class="plugin-prepare-versions-container" data-provide="plugin-prepare-versions-page" data-page="form">
 
-  <h1>Prepare Versions</h1>
+  <h1>${i18n.getText('prepare-versions.plugin.name')}</h1>
 
   [#if environmentsList?has_content]
 

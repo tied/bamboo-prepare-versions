@@ -5,6 +5,7 @@
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
         <param name="plugin-icon">images/pluginIcon.png</param>
         <param name="plugin-logo">images/pluginLogo.png</param>
+        <param name="configure.url">/admin/plugins/prepare-versions/configurePlugin.action</param>
     </plugin-info>
 
     <!-- add our i18n resource -->
@@ -22,7 +23,7 @@
     </web-resource>
 
     <web-item key="prepare-versions-menu-item" name="Prepare Versions" section="header.global.primary">
-        <label key="Versions"/>
+        <label key="prepare-versions.menu.label"/>
         <link>/prepareVersionsForm.action</link>
     </web-item>
 
@@ -34,7 +35,20 @@
         </package>
     </xwork>
 
+    <xwork key="prepare-versions-configurator" name="Prepare Versions Configurator">
+        <package name="configPrepareVersionsPlugin" extends="admin" namespace="/admin/plugins/prepare-versions">
+            <action name="configurePlugin" class="com.github.bayaro.ConfigurePluginAction" method="input">
+                <result name="input" type="freemarker">/configurePlugin.ftl</result>
+            </action>
+            <action name="savePluginConfiguration" class="com.github.bayaro.ConfigurePluginAction" method="save">
+                <result name="input" type="freemarker">/configurePlugin.ftl</result>
+                <result name="error" type="freemarker">/configurePlugin.ftl</result>
+                <result name="success" type="freemarker">/configurePlugin.ftl</result>
+            </action>
+        </package>
+    </xwork>
+
     <!-- import from the product container -->
     <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
-
+    <component-import key="bandanaManager" interface="com.atlassian.bandana.BandanaManager"/>
 </atlassian-plugin>
