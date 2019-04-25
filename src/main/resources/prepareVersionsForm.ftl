@@ -6,7 +6,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
 
   [#if environmentsList?has_content]
 
-    <form>
+    <form id="versions">
       <fieldset>
 
         <h3>Choose environment to deploy it</h3>
@@ -35,8 +35,8 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
       <tbody>
         [#list buildsList.projects?keys as k]
         <tr>
-          <td><a href="${baseUrl}/bamboo/browse/${buildsList.projects[k].name}">${k}</a></td>
-            <td><select class="select" name="${k}">
+          <td><a _target="blank" href="${baseUrl}/bamboo/browse/${buildsList.projects[k].name}">${k}</a></td>
+            <td><select class="select project" name="${k}">
               [#list buildsList.projects[k].branches?keys as b]
                 <option value="branch-${b}" disabled>${b}</option>
                 [#list buildsList.projects[k].branches[b] as v]
