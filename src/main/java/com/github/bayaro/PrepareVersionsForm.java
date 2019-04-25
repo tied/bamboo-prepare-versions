@@ -27,9 +27,11 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
     private List<String> environmentsList;
     private KnownEnvironmentBuilds buildsList;
+    private Map<String, List<String>> deployedVersions;
 
     private Pattern patternRpm = Pattern.compile( "^<a href=\"([^\"]*)-([^\"-]*)-([^\"-]*)\\.x86_64\\.rpm\">.*" );
     private Pattern patternBranch = Pattern.compile( "^([^\\.]*)\\.([0-9a-f]*)$" );
+    private Pattern patternInVersions = Pattern.compile( "^\\s*([^:]*):\\s*([^-]*)-([^\\s#$]*)[\\s#$].*" );
 
     @Nullable
     @Override
@@ -61,13 +63,16 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
         environmentsList = getAllEnvironments();
         buildsList = getAllKnownBuilds();
+        deployedVersions = getAllDeployedVersions( environmentsList );
 
         final HttpServletRequest request = ServletActionContext.getRequest();
         dep2env = request.getParameter( "dep2env" );
-        if ( dep2env == null ) dep2env = "";
         for ( String project : buildsList.getProjects().keySet() ) {
-            System.out.println( "****** " + project + " == " + request.getParameter( project ) );
             choosen.put( project, request.getParameter( project ) );
+        }
+
+        if ( dep2env == null ) {
+            dep2env = ( environmentsList.size() > 0 ) ? environmentsList.get(0) : "";
         }
 
         return Action.SUCCESS;
@@ -91,7 +96,6 @@ public class PrepareVersionsForm extends BambooActionSupport {
         }
 
         Collections.sort(list);
-
         return list.stream().distinct().collect(Collectors.toList());
     }
 
@@ -142,5 +146,41 @@ public class PrepareVersionsForm extends BambooActionSupport {
              builds.addVersion( m.group( 1 ), branch, m.group( 2 ) + "-" + m.group( 3 ) );
         }
         return builds;
+    }
+
+    @SuppressWarnings("unused")
+    public Map<String, List<String>> getDeployedVersions() {
+        return deployedVersions;
+    }
+
+    private void loadDeployedVersions( String envName, String uri, Map<String, List<String>> depVersions, String state ) {
+        List<String> htmlBuilds = loadURL( uri );
+        for ( String line : htmlBuilds ) {
+             Matcher m = patternInVersions.matcher( line );
+             if ( ! m.matches() ) continue;
+             String version = m.group( 1 ) + "-" + m.group( 2 ) + "-" + m.group( 3 );
+             List<String> envs = depVersions.get( version );
+             if ( envs == null ) {
+                 depVersions.put( version, new ArrayList<String>() );
+                 envs = depVersions.get( version );
+             }
+
+             if ( state == "?" && envs.contains( envName + "+" ) ) {
+                 envs.remove( envName + "+" );
+                 envs.add( envName );
+                 continue;
+             }
+             envs.add( envName + state );
+        }
+    }
+
+    private Map<String, List<String>> getAllDeployedVersions( List<String> environments ) {
+        final Map<String, List<String>> map = new TreeMap<>();
+
+        for (String envName : environments) {
+            loadDeployedVersions( envName, "/" + envName + "/versions.yaml.txt", map, "+" );
+            loadDeployedVersions( envName, "/" + envName + "/versions.yaml.txt.started.txt", map, "?" );
+        }
+        return map;
     }
 }

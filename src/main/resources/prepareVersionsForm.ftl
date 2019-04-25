@@ -18,7 +18,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
               <option value="${env}" [#if env == dep2env] selected [/#if]>${env}</option>
             [/#list]
           </select>
-          <button class="aui-button aui-button-primary" data-provide="deploy-button">Prepare release & Deploy</button>
+          <button class="aui-button aui-button-primary" data-provide="deploy-button">Prepare versions & Deploy</button>
           <input class="aui-button" type="submit" value="Refresh"/>
         </div>
 
@@ -38,9 +38,9 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
           <td><a href="${baseUrl}/bamboo/browse/${buildsList.projects[k].name}">${k}</a></td>
             <td><select class="select" name="${k}">
               [#list buildsList.projects[k].branches?keys as b]
-                [#if b != "-"]<option value="branch-${b}" disabled>${b}</option>[/#if]
+                <option value="branch-${b}" disabled>${b}</option>
                 [#list buildsList.projects[k].branches[b] as v]
-                  <option value="${v}" [#if v == choosen[k]] selected [/#if]>${v}</option>
+                  <option value="${v}" [#if (choosen[k]?? && v == choosen[k]) || (deployedVersions[k+"-"+v]?? && deployedVersions[k+"-"+v].contains(dep2env))] selected [/#if]>[#if deployedVersions[k+"-"+v]??]${deployedVersions[k+"-"+v]} [/#if]${v}</option>
                 [/#list]
               [/#list]
             </select></td>

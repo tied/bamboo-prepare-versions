@@ -9,8 +9,6 @@ public class KnownProjectBuilds {
 
     public KnownProjectBuilds( String name ) {
         this.name = name;
-        addVersion( "-", "present" );
-        addVersion( "-", "latest" );
     }
 
     public String getName() {
