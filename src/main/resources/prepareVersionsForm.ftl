@@ -9,10 +9,8 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
     <form id="versions">
       <fieldset>
 
-        <h3>Choose environment to deploy it</h3>
-
         <div class="field-group plugin-prepare-versions-environments">
-          <label>Environment name</label>
+          <label>Environment to deploy</label>
           <select class="select" name="dep2env" data-provide="environment-list">
             [#list environmentsList as env]
               <option value="${env}" [#if env == dep2env] selected [/#if]>${env}</option>
@@ -20,6 +18,14 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
           </select>
           <button class="aui-button aui-button-primary" data-provide="deploy-button">Prepare versions & Deploy</button>
           <input class="aui-button" type="submit" value="Refresh"/>
+        </div>
+
+        <hr>
+        <div class="field-group plugin-prepare-versions-environments">
+          <label>Deploy branch deployed to</label> &middot;[#list environmentsList as env]&middot; <a class="e">${env}</a> &middot;[/#list]
+        </div>
+        <div class="field-group plugin-prepare-versions-environments">
+          <label>Deploy branch</label> &middot; <a class="b">master</a> &middot;[#list branches as b][#if b != 'master']&middot; <a class="b">${b}</a> &middot;[/#if][/#list]
         </div>
 
       </fieldset>
@@ -48,10 +54,6 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
         [/#list]
       </tbody>
     </table>
-
-    <div class="plugin-prepare-versions-submit-container">
-            <br>
-    </div>
 
     </form>
 

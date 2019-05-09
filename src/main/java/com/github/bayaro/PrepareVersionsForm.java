@@ -31,6 +31,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private List<String> environmentsList;
     private KnownEnvironmentBuilds buildsList;
     private Map<String, List<String>> deployedVersions;
+    private Set<String> branches = new TreeSet<>();
 
     private Pattern patternRpm = Pattern.compile( "^<a href=\"([^\"]*)-([^\"-]*)-([^\"-]*)\\.x86_64\\.rpm\">.*" );
     private Pattern patternBranch = Pattern.compile( "^([^\\.]*)\\.([0-9a-f]*)$" );
@@ -69,7 +70,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     public String doDefault() throws Exception {
 
         environmentsList = getAllEnvironments();
-        buildsList = getAllKnownBuilds();
+        prepareAllKnownBuilds();
         deployedVersions = getAllDeployedVersions( environmentsList );
 
         final HttpServletRequest request = ServletActionContext.getRequest();
@@ -109,6 +110,11 @@ public class PrepareVersionsForm extends BambooActionSupport {
     @SuppressWarnings("unused")
     public KnownEnvironmentBuilds getBuildsList() {
         return buildsList;
+    }
+
+    @SuppressWarnings("unused")
+    public Set<String> getBranches() {
+        return branches;
     }
 
     static public List<String> loadURL( String path, String storageUrl, String storageUsr, String storagePwd ) {
@@ -154,8 +160,9 @@ public class PrepareVersionsForm extends BambooActionSupport {
         );
     }
 
-    private KnownEnvironmentBuilds getAllKnownBuilds() {
+    private void prepareAllKnownBuilds() {
         KnownEnvironmentBuilds builds = new KnownEnvironmentBuilds( "builds" );
+        Set<String> branches = new TreeSet<>();
         List<String> htmlBuilds = loadURL( "/builds" );
         Collections.sort( htmlBuilds, Collections.reverseOrder());
 
@@ -164,9 +171,11 @@ public class PrepareVersionsForm extends BambooActionSupport {
              if ( ! m.matches() ) continue;
              Matcher b = patternBranch.matcher( m.group( 3 ) );
              String branch = b.matches() ? b.group( 1 ) : "master";
+             branches.add( branch.replace( "_", "-" ).replaceAll( "^(FX-[0-9]*)-", "$1/" ) );
              builds.addVersion( m.group( 1 ), branch, m.group( 2 ) + "-" + m.group( 3 ) );
         }
-        return builds;
+        this.branches = branches;
+        this.buildsList = builds;
     }
 
     @SuppressWarnings("unused")
@@ -179,11 +188,11 @@ public class PrepareVersionsForm extends BambooActionSupport {
         for ( String line : htmlBuilds ) {
              Matcher m = patternInVersions.matcher( line );
              if ( ! m.matches() ) continue;
-             String version = m.group( 1 ) + "-" + m.group( 2 ) + "-" + m.group( 3 );
-             List<String> envs = depVersions.get( version );
+             String build = m.group( 1 ) + "-" + m.group( 2 ) + "-" + m.group( 3 );
+             List<String> envs = depVersions.get( build );
              if ( envs == null ) {
-                 depVersions.put( version, new ArrayList<String>() );
-                 envs = depVersions.get( version );
+                 depVersions.put( build, new ArrayList<String>() );
+                 envs = depVersions.get( build );
              }
 
              if ( state == "?" && envs.contains( envName + "+" ) ) {
@@ -198,8 +207,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private Map<String, List<String>> getAllDeployedVersions( List<String> environments ) {
         final Map<String, List<String>> map = new TreeMap<>();
 
-        //for (String envName : environments) {
-        for (String envName : Arrays.asList( "dev1", "dev2", "dev3" , "stb", "prod" ) ) {
+        for (String envName : environments) {
             loadDeployedVersions( envName, "/" + envName + "/versions.yaml.txt", map, "+" );
             loadDeployedVersions( envName, "/" + envName + "/versions.yaml.txt.started.txt", map, "?" );
         }
