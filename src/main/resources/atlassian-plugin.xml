@@ -30,6 +30,7 @@
     <xwork key="prepare-versions-form" name="Prepare Versions Form">
         <package name="prepareVersionsPlugin" extends="default">
             <action name="prepareVersionsForm" class="com.github.bayaro.PrepareVersionsForm" method="default">
+                <!-- param name="RequireSecurityToken">true</param -->
                 <result name="success" type="freemarker">/prepareVersionsForm.ftl</result>
             </action>
         </package>

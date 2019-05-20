@@ -1,8 +1,21 @@
 ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare-versions-resources")}
 
+    [#if errorMessage != ""]
+        <script type="application/javascript">
+            require(['aui/flag'], function(Flag) {
+                new Flag({ type: 'error', body: '${errorMessage}' });
+            });
+        </script>
+    [/#if]
+
+
 <div class="plugin-prepare-versions-container" data-provide="plugin-prepare-versions-page" data-page="form">
 
   <h1>${i18n.getText('prepare-versions.plugin.name')}</h1>
+
+  [#if errorMessage != ""]
+    <label class='error'>ERROR: ${errorMessage}</label>
+  [/#if]
 
   [#if environmentsList?has_content]
 
@@ -10,7 +23,9 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
       <fieldset>
 
         <div class="field-group plugin-prepare-versions-environments">
-          <label>Environment to deploy</label>
+          <label>In project:</label> <b>${dep2proj}</b>
+          <label>with plan:</label> <b>${depByPlan}</b>
+          <label>for environment:</label>
           <select class="select" name="dep2env" data-provide="environment-list">
             [#list environmentsList as env]
               <option value="${env}" [#if env == dep2env] selected [/#if]>${env}</option>

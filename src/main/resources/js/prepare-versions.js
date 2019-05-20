@@ -6,8 +6,8 @@
             return false;
         });
         $("#versions select[name=dep2env]").change(function() {
-            var curEnv = new RegExp( '[\\[ ]' + $(this).val() + '[,\\]]');
-            var prodEnv = new RegExp( '[\\[ ]prod[,\\]]' );
+            var curEnv = new RegExp( '[\\[ ]' + $(this).val() + '[\?,\\]]');
+            var prodEnv = new RegExp( '[\\[ ]prod[\?,\\]]' );
             $("#versions select.project").each( function() {
                 var options = $(this).children("option").filter( function() {
                     return curEnv.test( $(this).text() );
@@ -30,7 +30,7 @@
             $("#versions select.project option[value=branch-" + $(this).text().replace( /[^a-zA-Z0-9]/g, '_' ) + "]").next().prop('selected', 'selected');
         });
         $("#versions a.e").click(function() {
-            var curEnv = new RegExp( '[\\[ ]' + $(this).text() + '[,\\]]');
+            var curEnv = new RegExp( '[\\[ ]' + $(this).text() + '[\?,\\]]');
             $("#versions select.project option").filter( function() {
                 return curEnv.test( $(this).text() );
             }).prop('selected', 'selected');
