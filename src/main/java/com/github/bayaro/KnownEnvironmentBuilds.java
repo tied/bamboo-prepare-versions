@@ -35,4 +35,10 @@ public class KnownEnvironmentBuilds {
     public void addVersion( String project, String branch, String version ) {
         addProject( project ).addVersion( branch, version );
     }
+
+    public void sort() {
+        for (String key : projects.keySet()) {
+            projects.get( key ).sort();
+        }
+    }
 }

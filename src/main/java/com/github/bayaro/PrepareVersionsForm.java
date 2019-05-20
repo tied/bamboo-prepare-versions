@@ -228,6 +228,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
              builds.addVersion( m.group( 1 ), branch, m.group( 2 ) + "-" + m.group( 3 ) );
         }
         this.branches = branches;
+        builds.sort();
         this.buildsList = builds;
     }
 

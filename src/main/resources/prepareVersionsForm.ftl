@@ -61,7 +61,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
               [#list buildsList.projects[k].branches?keys as b]
                 <option value="branch-${b}" disabled>${b}</option>
                 [#list buildsList.projects[k].branches[b] as v]
-                  <option value="${v}" [#if (choosen[k]?? && v == choosen[k]) || (deployedVersions[k+"-"+v]?? && deployedVersions[k+"-"+v].contains(dep2env))] selected [/#if]>[#if deployedVersions[k+"-"+v]??]${deployedVersions[k+"-"+v]} [/#if]${v}</option>
+                  <option value="${v}" [#if (choosen[k]?? && v == choosen[k]) || (deployedVersions[k+"-"+v]?? && deployedVersions[k+"-"+v].contains(dep2env + "?"))] selected [/#if]>[#if deployedVersions[k+"-"+v]??]${deployedVersions[k+"-"+v]} [/#if]${v}</option>
                 [/#list]
               [/#list]
             </select></td>
