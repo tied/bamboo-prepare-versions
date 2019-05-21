@@ -38,11 +38,14 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
 
         <hr>
         <div class="field-group plugin-prepare-versions-environments">
-          <label>Deploy branch deployed to</label> &middot;[#list environmentsList as env]&middot; <a class="e">${env}</a> &middot;[/#list]
+          <label>Deploy branches deployed to</label> [#list environmentsList as env]&middot; <a class="e">${env}</a> &middot;[/#list]
         </div>
-        <div class="field-group plugin-prepare-versions-environments">
-          <label>Deploy branch</label> &middot; <a class="b">master</a> &middot;[#list branches as b][#if b != 'master']&middot; <a class="b">${b}</a> &middot;[/#if][/#list]
+        [#list branches?keys as bg]
+        <div class="field-group plugin-prepare-versions-environments" data="${bg}">
+          <label>[#if bg == '']branches[/#if]${bg}</label>
+          [#if bg == '']&middot; <a class="b">master</a>[/#if][#list branches[bg] as b] &middot; <a class="b">${b}</a>[/#list]
         </div>
+        [/#list]
 
       </fieldset>
 

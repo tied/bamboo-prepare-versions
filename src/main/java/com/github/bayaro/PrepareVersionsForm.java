@@ -39,11 +39,14 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private List<String> environmentsList;
     private KnownEnvironmentBuilds buildsList;
     private Map<String, List<String>> deployedVersions;
-    private Set<String> branches = new TreeSet<>();
+    private Map<String, Set<String>> branches = new HashMap<>();
 
     private Pattern patternRpm = Pattern.compile( "^<a href=\"([^\"]*)-([^\"-]*)-([^\"-]*)\\.x86_64\\.rpm\">.*" );
     private Pattern patternBranch = Pattern.compile( "^([^\\.]*)\\.([0-9a-f]*)$" );
     private Pattern patternInVersions = Pattern.compile( "^\\s*([^:]*):\\s*([^-]*)-([^\\s#$]*)(\\s|#|$).*" );
+    private String BranchGroups = "hotfix|bugfix|feature";
+    private Pattern patternBranchView = Pattern.compile( "(?i)^(FX-[0-9]*|" + BranchGroups + ")-(.*)$" );
+    private Pattern patternBranchGroup = Pattern.compile( "^(" + BranchGroups + ")$" );
 
     private BandanaManager bandanaManager;
     private BambooAuthenticationContext bambooAuthenticationContext;
@@ -175,7 +178,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     }
 
     @SuppressWarnings("unused")
-    public Set<String> getBranches() {
+    public Map<String, Set<String>> getBranches() {
         return branches;
     }
 
@@ -224,7 +227,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
     private void prepareAllKnownBuilds() {
         KnownEnvironmentBuilds builds = new KnownEnvironmentBuilds( "builds" );
-        Set<String> branches = new TreeSet<>();
+        Map<String, Set<String>> branches = new TreeMap();
         List<String> htmlBuilds = loadURL( "/builds" );
         Collections.sort( htmlBuilds, Collections.reverseOrder());
 
@@ -232,9 +235,22 @@ public class PrepareVersionsForm extends BambooActionSupport {
              Matcher m = patternRpm.matcher( line );
              if ( ! m.matches() ) continue;
              Matcher b = patternBranch.matcher( m.group( 3 ) );
-             String branch = b.matches() ? b.group( 1 ) : "master";
-             branches.add( branch.replace( "_", "-" ).replaceAll( "^(FX-[0-9]*)-", "$1/" ) );
-             builds.addVersion( m.group( 1 ), branch, m.group( 2 ) + "-" + m.group( 3 ) );
+             String branch = b.matches() ? b.group( 1 ) : "";
+             if ( branch != "" ) {
+                 String bv = branch.replace( "_", "-" );
+                 Matcher bvm = patternBranchView.matcher( bv );
+                 Boolean hasPref = bvm.matches() && patternBranchGroup.matcher( bvm.group( 1 ) ).matches();
+                 String pref = hasPref ? bvm.group( 1 ) : "";
+                 Set<String> bInPref = branches.get( pref );
+                 if ( bInPref == null ) {
+                    branches.put( pref, new TreeSet<>() );
+                    bInPref = branches.get( pref );
+                 }
+                 bInPref.add( hasPref ? bvm.group( 2 ).replaceAll( "^(FX-[0-9]*)-", "$1/" )
+                    : ( bvm.matches() ? bvm.group( 1 ) + "/" + bvm.group( 2 ) : bv  )
+                 );
+             }
+             builds.addVersion( m.group( 1 ), branch == "" ? "master" : branch, m.group( 2 ) + "-" + m.group( 3 ) );
         }
         this.branches = branches;
         builds.sort();

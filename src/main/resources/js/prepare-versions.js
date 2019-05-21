@@ -45,7 +45,10 @@
             });
         });
         $("#versions a.b").click(function() {
-            $("#versions select.project option[value=branch-" + $(this).text().replace( /[^a-zA-Z0-9]/g, '_' ) + "]").next().prop('selected', 'selected');
+            var bn = $(this).parent().attr("data");
+            if ( bn != "" ) bn += "_";
+            bn += $(this).text();
+            $("#versions select.project option[value=branch-" + bn.replace( /[^a-zA-Z0-9]/g, '_' ) + "]").next().prop('selected', 'selected');
         });
         $("#versions a.e").click(function() {
             var curEnv = new RegExp( '[\\[ ]' + $(this).text() + '[\?,\\]]');
