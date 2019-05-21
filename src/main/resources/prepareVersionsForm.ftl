@@ -28,9 +28,9 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
           <label>with plan:</label> <b>${depByPlan}</b>
           <label>for environment:</label>
           <select class="select" name="dep2env" data-provide="environment-list">
-            [#list environmentsList as env]
+            [#list environmentsList as env][#if env != 'prod']
               <option value="${env}" [#if env == dep2env] selected [/#if]>${env}</option>
-            [/#list]
+            [/#if][/#list]
           </select>
           <button id="prepare" class="aui-button aui-button-primary" data-provide="deploy-button">Prepare versions & Deploy</button>
           <input class="aui-button" type="submit" value="Refresh"/>

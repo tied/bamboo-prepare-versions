@@ -7,7 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jetbrains.annotations.Nullable;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
-import com.atlassian.bamboo.deployments.environments.service.EnvironmentService;
+import com.atlassian.bamboo.deployments.projects.service.*;
+import com.atlassian.bamboo.deployments.projects.*;
 
 import java.util.*;
 import com.atlassian.bamboo.deployments.environments.Environment;
@@ -25,7 +26,7 @@ import com.atlassian.user.User;
 
 public class PrepareVersionsForm extends BambooActionSupport {
 
-    private final EnvironmentService environmentService;
+    private DeploymentProjectService deploymentProjectService;
     private final String baseUrl;
 
     private String errorMessage = "";
@@ -68,13 +69,13 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
     public PrepareVersionsForm(
         final AdministrationConfigurationAccessor configurationAccessor,
-        final EnvironmentService environmentService,
+        final DeploymentProjectService deploymentProjectService,
         final BandanaManager bandanaManager,
         final BambooAuthenticationContext bambooAuthenticationContext,
         final PlanManager planManager,
         final PlanExecutionManager planExecutionManager
     ) {
-        this.environmentService = environmentService;
+        this.deploymentProjectService = deploymentProjectService;
         this.baseUrl = configurationAccessor.getAdministrationConfiguration().getBaseUrl();
 
         this.bandanaManager = bandanaManager;
@@ -152,11 +153,13 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
     private List<String> getAllEnvironments() {
         final List<String> list = new ArrayList<>();
+        list.add( "prod" );
 
         try {
-            Iterable<Environment> environments = environmentService.getAllEnvironments();
-            for (Environment environment : environments) {
-                list.add( environment.getName() );
+            for( DeploymentProject dp : deploymentProjectService.getDeploymentProjectsRelatedToPlan( buildPlan.getPlanKey() ) ) {
+                for( Environment e : dp.getEnvironments() ) {
+                    list.add( e.getName() );
+                }
             }
         } catch (Exception ex) {
             // Not authorised
