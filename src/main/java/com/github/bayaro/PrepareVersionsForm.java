@@ -30,9 +30,10 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
     private String errorMessage = "";
     private String dep2proj = "FX";
-    private String depByPlan = "deploy.versions";
+    private String depByPlan = "prepare.versions";
     private String dep2env;
     private Map<String, String> choosen = new HashMap<>();
+    private TopLevelPlan buildPlan = null;
 
     private List<String> environmentsList;
     private KnownEnvironmentBuilds buildsList;
@@ -59,6 +60,8 @@ public class PrepareVersionsForm extends BambooActionSupport {
     public String getDepByPlan() { return depByPlan; }
     @SuppressWarnings("unused")
     public String getDep2env() { return dep2env; }
+    @SuppressWarnings("unused")
+    public TopLevelPlan getBuildPlan() { return buildPlan; }
 
     @SuppressWarnings("unused")
     public Map<String, String> getChoosen() { return choosen; }
@@ -84,18 +87,20 @@ public class PrepareVersionsForm extends BambooActionSupport {
         System.out.println( "++++++++++" + o );
     }
 
-    private String executeBuild() {
 
-        TopLevelPlan buildPlan = null;
+    private void locateBuildPlan() {
         List<TopLevelPlan> plans = planManager.getAllPlans();
 
+        buildPlan = null;
         for ( TopLevelPlan p : plans ) {
             if ( ! p.getProject().getName().equals( dep2proj ) ) continue;
             if ( ! p.getName().equals( dep2proj + " - " + depByPlan ) ) continue;
-            buildPlan  = p;
+            buildPlan = p;
             break;
         }
+    }
 
+    private String executeBuild() {
         if ( buildPlan == null ) {
             errorMessage = "Couldn't find the buildPlan '" + depByPlan + "' in the project '" + dep2proj + "'!";
             return Action.SUCCESS;
@@ -105,9 +110,9 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
         Map<String,String> params = new HashMap<String, String>();
         Map<String,String> vars = new HashMap<String, String>();
-        vars.put( "deploy_versions_2_environment", dep2env );
+        vars.put( "dep2env", dep2env );
         for (Map.Entry<String, String> entry : choosen.entrySet()) {
-            vars.put( "version_of_" + entry.getKey(), entry.getValue() );
+            vars.put( String.format("%2d", vars.size() ), entry.getKey() + ": " + entry.getValue() );
         }
 
         planExecutionManager.startManualExecution( buildPlan, user, params, vars );
@@ -118,6 +123,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     public String doDefault() throws Exception {
         errorMessage = "";
 
+        locateBuildPlan();
         environmentsList = getAllEnvironments();
         prepareAllKnownBuilds();
         deployedVersions = getAllDeployedVersions( environmentsList );

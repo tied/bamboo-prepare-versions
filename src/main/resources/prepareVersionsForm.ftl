@@ -20,6 +20,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
   [#if environmentsList?has_content]
 
     <form id="versions">
+      <input type="hidden" name="planKey" value="[#if buildPlan??]${buildPlan.getPlanKey()}[/#if]">
       <fieldset>
 
         <div class="field-group plugin-prepare-versions-environments">
@@ -31,7 +32,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
               <option value="${env}" [#if env == dep2env] selected [/#if]>${env}</option>
             [/#list]
           </select>
-          <button class="aui-button aui-button-primary" data-provide="deploy-button">Prepare versions & Deploy</button>
+          <button id="prepare" class="aui-button aui-button-primary" data-provide="deploy-button">Prepare versions & Deploy</button>
           <input class="aui-button" type="submit" value="Refresh"/>
         </div>
 
@@ -61,7 +62,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
               [#list buildsList.projects[k].branches?keys as b]
                 <option value="branch-${b}" disabled>${b}</option>
                 [#list buildsList.projects[k].branches[b] as v]
-                  <option value="${v}" [#if (choosen[k]?? && v == choosen[k]) || (deployedVersions[k+"-"+v]?? && deployedVersions[k+"-"+v].contains(dep2env + "?"))] selected [/#if]>[#if deployedVersions[k+"-"+v]??]${deployedVersions[k+"-"+v]} [/#if]${v}</option>
+                  <option value="${v}" [#if (choosen[k]?? && v == choosen[k]) || (deployedVersions[k+"-"+v]?? && (deployedVersions[k+"-"+v].contains(dep2env + "?") || deployedVersions[k+"-"+v].contains(dep2env)))] selected [/#if]>[#if deployedVersions[k+"-"+v]??]${deployedVersions[k+"-"+v]} [/#if]${v}</option>
                 [/#list]
               [/#list]
             </select></td>
