@@ -3,6 +3,8 @@
         $("#versions #prepare").click( function() {
             try {
 				var form = '<input type="hidden" name="planKey" value="' + $("#versions input[name=planKey]").val() + '">'
+                    + '<input type="hidden" name="key_release" value="release">'
+                    + '<input type="hidden" name="variable_release" value="' + $("#versions input[name=releaseName]").val() + '">'
                     + '<input type="hidden" name="key_dep2env" value="deploy_2">'
                     + '<input type="hidden" name="variable_dep2env" value="' + $("#versions select[name=dep2env]").val() + '">';
                 var ki = 1;
@@ -49,12 +51,19 @@
             if ( bn != "" ) bn += "_";
             bn += $(this).text();
             $("#versions select.project option[value=branch-" + bn.replace( /[^a-zA-Z0-9]/g, '_' ) + "]").next().prop('selected', 'selected');
+            $("#versions input[name=releaseName]").val( $(this).text() );
         });
         $("#versions a.e").click(function() {
             var curEnv = new RegExp( '[\\[ ]' + $(this).text() + '[\?,\\]]');
             $("#versions select.project option").filter( function() {
                 return curEnv.test( $(this).text() );
             }).prop('selected', 'selected');
+            var comm = ( $("#versions select[name=dep2env]").val() == $(this).text() ) ? "Redeploy ???"
+                : "Coping the " + $(this).text() + " environment";
+            $("#versions input[name=releaseName]").val( comm );
+        });
+        $("#versions input[name=releaseName]").click( function() {
+            $(this).select();
         });
     });
 })(jQuery, window);

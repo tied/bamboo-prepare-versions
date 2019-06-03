@@ -32,6 +32,7 @@ ${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare
               <option value="${env}" [#if env == dep2env] selected [/#if]>${env}</option>
             [/#if][/#list]
           </select>
+          <label>release name:</label> <input name="releaseName" value="${releaseName}"/>
           <button id="prepare" class="aui-button aui-button-primary" data-provide="deploy-button">Prepare versions & Deploy</button>
           <input class="aui-button" type="submit" value="Refresh"/>
         </div>

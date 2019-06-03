@@ -33,6 +33,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private String dep2proj = "FX";
     private String depByPlan = "prepare.versions";
     private String dep2env;
+    private String releaseName;
     private Map<String, String> choosen = new HashMap<>();
     private TopLevelPlan buildPlan = null;
 
@@ -65,6 +66,8 @@ public class PrepareVersionsForm extends BambooActionSupport {
     @SuppressWarnings("unused")
     public String getDep2env() { return dep2env; }
     @SuppressWarnings("unused")
+    public String getReleaseName() { return releaseName; }
+    @SuppressWarnings("unused")
     public TopLevelPlan getBuildPlan() { return buildPlan; }
 
     @SuppressWarnings("unused")
@@ -91,7 +94,6 @@ public class PrepareVersionsForm extends BambooActionSupport {
         System.out.println( "++++++++++" + o );
     }
 
-
     private void locateBuildPlan() {
         List<TopLevelPlan> plans = planManager.getAllPlans();
 
@@ -109,12 +111,17 @@ public class PrepareVersionsForm extends BambooActionSupport {
             errorMessage = "Couldn't find the buildPlan '" + depByPlan + "' in the project '" + dep2proj + "'!";
             return Action.SUCCESS;
         }
+        if ( releaseName == "" ) {
+            errorMessage = "Please, describe the release!";
+            return Action.SUCCESS;
+        }
 
         User user = bambooAuthenticationContext.getUser();
 
         Map<String,String> params = new HashMap<String, String>();
         Map<String,String> vars = new HashMap<String, String>();
         vars.put( "dep2env", dep2env );
+        vars.put( "releaseName", releaseName );
         for (Map.Entry<String, String> entry : choosen.entrySet()) {
             vars.put( String.format("%2d", vars.size() ), entry.getKey() + ": " + entry.getValue() );
         }
@@ -134,12 +141,16 @@ public class PrepareVersionsForm extends BambooActionSupport {
 
         final HttpServletRequest request = ServletActionContext.getRequest();
         dep2env = request.getParameter( "dep2env" );
+        releaseName = request.getParameter( "releaseName" );
         for ( String project : buildsList.getProjects().keySet() ) {
             choosen.put( project, request.getParameter( project ) );
         }
 
+        releaseName = ( releaseName == null ) ? "" : releaseName.trim();
+
         if ( dep2env == null ) {
             dep2env = ( environmentsList.size() > 0 ) ? environmentsList.get(0) : "";
+            return Action.SUCCESS;
         }
 
         if ( "js".equals( request.getParameter( "atl_token_source" ) ) ) {
