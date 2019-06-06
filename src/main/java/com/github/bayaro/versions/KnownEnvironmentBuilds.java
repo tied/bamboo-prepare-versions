@@ -1,4 +1,4 @@
-package com.github.bayaro;
+package com.github.bayaro.versions;
 
 import java.util.*;
 

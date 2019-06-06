@@ -1,4 +1,4 @@
-package com.github.bayaro;
+package com.github.bayaro.versions;
 
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.opensymphony.xwork2.Action;

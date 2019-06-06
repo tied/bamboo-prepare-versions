@@ -3,8 +3,6 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="plugin-icon">images/pluginIcon.png</param>
-        <param name="plugin-logo">images/pluginLogo.png</param>
         <param name="configure.url">/admin/plugins/prepare-versions/configurePlugin.action</param>
     </plugin-info>
 
@@ -12,7 +10,7 @@
     <resource type="i18n" name="i18n" location="prepare-versions"/>
 
     <!-- add our web resources -->
-    <web-resource key="prepare-versions-resources" name="prepare-versions Web Resources">
+    <web-resource key="resources" name="Web Resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
 
         <resource type="download" name="prepare-versions.css" location="/css/prepare-versions.css"/>
@@ -22,34 +20,30 @@
         <context>prepare-versions</context>
     </web-resource>
 
-    <web-item key="prepare-versions-menu-item" name="Prepare Versions" section="header.global.primary">
+    <web-item key="menu-item" name="Menu Item Versions" section="header.global.primary">
         <label key="prepare-versions.menu.label"/>
         <link>/prepareVersionsForm.action</link>
     </web-item>
 
-    <xwork key="prepare-versions-form" name="Prepare Versions Form">
+    <xwork key="form" name="Versions Form">
         <package name="prepareVersionsPlugin" extends="default">
-            <action name="prepareVersionsForm" class="com.github.bayaro.PrepareVersionsForm" method="default">
+            <action name="prepareVersionsForm" class="com.github.bayaro.versions.PrepareVersionsForm" method="default">
                 <!-- param name="RequireSecurityToken">true</param -->
                 <result name="success" type="freemarker">/prepareVersionsForm.ftl</result>
             </action>
         </package>
     </xwork>
 
-    <xwork key="prepare-versions-configurator" name="Prepare Versions Configurator">
+    <xwork key="configurator" name="Plugin Configurator">
         <package name="configPrepareVersionsPlugin" extends="admin" namespace="/admin/plugins/prepare-versions">
-            <action name="configurePlugin" class="com.github.bayaro.ConfigurePluginAction" method="input">
+            <action name="configurePlugin" class="com.github.bayaro.versions.ConfigurePluginAction" method="input">
                 <result name="input" type="freemarker">/configurePlugin.ftl</result>
             </action>
-            <action name="savePluginConfiguration" class="com.github.bayaro.ConfigurePluginAction" method="save">
+            <action name="savePluginConfiguration" class="com.github.bayaro.versions.ConfigurePluginAction" method="save">
                 <result name="input" type="freemarker">/configurePlugin.ftl</result>
                 <result name="error" type="freemarker">/configurePlugin.ftl</result>
                 <result name="success" type="freemarker">/configurePlugin.ftl</result>
             </action>
         </package>
     </xwork>
-
-    <!-- import from the product container -->
-    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
-    <component-import key="bandanaManager" interface="com.atlassian.bandana.BandanaManager"/>
 </atlassian-plugin>

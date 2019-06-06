@@ -1,4 +1,4 @@
-${webResourceManager.requireResource("com.github.bayaro.prepare-versions:prepare-versions-resources")}
+${webResourceManager.requireResource("com.github.bayaro.versions.prepare-versions:resources")}
 
     [#if errorMessage != ""]
         <script type="application/javascript">

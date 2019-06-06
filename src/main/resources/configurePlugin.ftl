@@ -1,5 +1,5 @@
-[#-- @ftlvariable name="action" type="com.github.bayaro.ConfigurePluginAction" --]
-[#-- @ftlvariable name="" type="com.github.bayaro.ConfigurePluginAction" --]
+[#-- @ftlvariable name="action" type="com.github.bayaro.versions.ConfigurePluginAction" --]
+[#-- @ftlvariable name="" type="com.github.bayaro.versions.ConfigurePluginAction" --]
 
 <html><head>
     <title>[@ww.text name='prepare-versions.plugin.name' /]</title>
