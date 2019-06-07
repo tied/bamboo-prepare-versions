@@ -46,4 +46,7 @@
             </action>
         </package>
     </xwork>
+
+    <postStageAction key="post-stage-action" name="Trigger Deployment" class="com.github.bayaro.versions.TriggerDeployment">
+    </postStageAction>
 </atlassian-plugin>
