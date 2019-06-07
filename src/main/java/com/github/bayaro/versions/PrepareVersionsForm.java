@@ -26,12 +26,13 @@ import com.atlassian.user.User;
 
 public class PrepareVersionsForm extends BambooActionSupport {
 
+    static public String dep2proj = "FX";
+    static public String depByPlan = "prepare.versions";
+
     private DeploymentProjectService deploymentProjectService;
     private final String baseUrl;
 
     private String errorMessage = "";
-    private String dep2proj = "FX";
-    private String depByPlan = "prepare.versions";
     private String dep2env;
     private String releaseName;
     private Map<String, String> choosen = new HashMap<>();
