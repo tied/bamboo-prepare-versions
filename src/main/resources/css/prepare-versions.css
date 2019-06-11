@@ -5,3 +5,10 @@ label.error {
     margin: 1em;
     display: block;
 }
+
+#versions iframe {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    border: 0;
+}

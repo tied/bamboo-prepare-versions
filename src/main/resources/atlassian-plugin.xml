@@ -49,4 +49,18 @@
 
     <postStageAction key="post-stage-action" name="Trigger Deployment" class="com.github.bayaro.versions.TriggerDeployment">
     </postStageAction>
+
+    <!-- The kludge. I do not want to look for how it is possible to get the pure json from bamboo.
+         So the iframe was added to every application row in the versions from.
+         On click by link the iframe src is changed accordingly.
+         On iframe load the required porion of page are moved/copied to the div into the application row.
+         -->
+    <xwork key="commits-list" name="AJAX: List of Commits">
+        <package name="commitsListiPlugin" extends="default">
+            <action name="getCommitsList" class="com.github.bayaro.versions.CommitsList" method="default">
+                <!-- param name="RequireSecurityToken">true</param -->
+                <result name="success" type="freemarker">/showCommitsList.ftl</result>
+            </action>
+        </package>
+    </xwork>
 </atlassian-plugin>

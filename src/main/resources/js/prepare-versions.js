@@ -43,21 +43,22 @@
                 if ( options.length == 0 ) {
                     options = $(this).children("option:first").next();
                 }
-                options.prop('selected', 'selected');
+                options.prop('selected', 'selected').parent().change();
             });
         });
         $("#versions a.b").click(function() {
             var bn = $(this).parent().attr("data");
             if ( bn != "" ) bn += "_";
             bn += $(this).text();
-            $("#versions select.project option[value=branch-" + bn.replace( /[^a-zA-Z0-9]/g, '_' ) + "]").next().prop('selected', 'selected');
+            $("#versions select.project option[value=branch-" + bn.replace( /[^a-zA-Z0-9]/g, '_' ) + "]").next()
+                .prop('selected', 'selected').parent().change();
             $("#versions input[name=releaseName]").val( $(this).text() );
         });
         $("#versions a.e").click(function() {
             var curEnv = new RegExp( '[\\[ ]' + $(this).text() + '[\?,\\]]');
             $("#versions select.project option").filter( function() {
                 return curEnv.test( $(this).text() );
-            }).prop('selected', 'selected');
+            }).prop('selected', 'selected').parent().change();
             var comm = ( $("#versions select[name=dep2env]").val() == $(this).text() ) ? "Redeploy ???"
                 : "Coping the " + $(this).text() + " environment";
             $("#versions input[name=releaseName]").val( comm );
@@ -65,5 +66,17 @@
         $("#versions input[name=releaseName]").click( function() {
             $(this).select();
         });
+        $("#versions select.project").change( function() {
+            var curEnv = new RegExp( '[\\[ ]' + $("#versions select[name=dep2env]").val() + '[\?,\\]]');
+            $(this).closest('tr').find('a.sc').css( 'display', curEnv.test( $(this).children('option:selected').text() ) ? 'none' : 'inline' );
+        });
+        $("#versions iframe").load( function() {
+            console.log( 'xxx' );
+            $(this).closest('tr').find('div.l').html( $(this).contents().find('section#content div div').html() );
+        });
+        $("#versions a.sc").click( function() {
+            $(this).closest('tr').find('iframe').attr('src','getCommitsList.action');
+        });
+        $("#versions select.project").change();
     });
 })(jQuery, window);
