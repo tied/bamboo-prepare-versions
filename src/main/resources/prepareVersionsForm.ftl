@@ -69,7 +69,7 @@ ${webResourceManager.requireResource("com.github.bayaro.versions.prepare-version
                 [/#list]
               [/#list]
             </select>
-            <a class="sc">${i18n.getText('prepare-versions.form.show-commits')}</a>
+            <a class="sc" show="${i18n.getText('prepare-versions.form.show-commits')}" hide="${i18n.getText('prepare-versions.form.hide-commits')}"></a>
             <iframe></iframe>
             <div class="l"></div>
             </td>
