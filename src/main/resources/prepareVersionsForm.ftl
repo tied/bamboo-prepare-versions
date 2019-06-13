@@ -18,7 +18,7 @@ ${webResourceManager.requireResource("com.github.bayaro.versions.prepare-version
 
   [#if environmentsList?has_content]
 
-    <form id="versions">
+    <form id="versions" username="${username}">
       <input type="hidden" name="planKey" value="[#if buildPlan??]${buildPlan.getPlanKey()}[/#if]">
       <fieldset>
 
@@ -61,7 +61,7 @@ ${webResourceManager.requireResource("com.github.bayaro.versions.prepare-version
         [#list buildsList.projects?keys as k]
         <tr>
             <td><a _target="blank" href="${baseUrl}/bamboo/browse/${buildsList.projects[k].name}">${k}</a></td>
-            <td><select class="select project" name="${k}">
+            <td><select class="select project" name="${k}" reponame="[#if reponames[k]??]${reponames[k]}[/#if]">
               [#list buildsList.projects[k].branches?keys as b]
                 <option value="branch-${b}" disabled>${b}</option>
                 [#list buildsList.projects[k].branches[b] as v]

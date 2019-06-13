@@ -84,15 +84,48 @@
                 $(this).text($(this).attr('show'));
                 return;
             }
-            var curEnv = new RegExp('[\\[ ]' + $("#versions select[name=dep2env]").val() + '[\?,\\]]');
+            var envName = $("#versions select[name=dep2env]").val();
+            var curEnv = new RegExp('[\\[ ]' + envName + '[\?,\\]]');
             var sel = $(this).closest('tr').find('select.project');
             var deployed = sel.find('option').filter(function() {
                 return curEnv.test($(this).text());
             });
-            deployed = ( deployed.length > 0 ) ? $(deployed.get(0)).attr('value') : '';
-            $(this).closest('tr').find('iframe').attr('src','getCommitsList.action?'
-                + 'p=' + sel.attr('name') + '&wanted=' + sel.val() + '&deployed=' + deployed
+            deployed = (( deployed.length > 0 ) ? $(deployed.get(0)).attr('value') : '').replace( /^.*[-\.]([0-9a-f]*)$/, '$1' );
+			var wanted = sel.val().replace( /^.*[-\.]([0-9a-f]*)$/, '$1' );
+
+            var uname = $('#versions').attr('username'),
+                dtag = sel.attr('name').replace( /^fx-/, '' ) + '-at-' + envName,
+                wtag = uname + '-wants';
+            var anchor = '<a target=_blank href="https://strictweb.com/stash/projects/FX/repos/' + sel.attr('reponame');
+
+			d.html( '<p>'
+                + '<br>deployed: tag ' + anchor + '/commits?until=' + dtag + '">' +dtag+ '</a>'
+				+ ', commit ' + anchor + '/commits/' + deployed + '">' +deployed+ '</a>'
+                + ' :: wanted: tag ' + anchor + '/commits?until=' + wtag + '">' +wtag+ '</a>'
+				+ ', commit ' + anchor + '/commits/' + wanted + '">' +wanted+ '</a>'
+                + ' :: ' + anchor + '/compare/commits?targetBranch=refs/tags/'+dtag+'&sourceBranch=refs/tags/'+wtag+ '" class="cmp">Compare</a>'
             );
+            $(this).text($(this).attr('hide'));
+            d.find("a.cmp").click(function() {
+                var reponame = $(this).closest('tr').find('select.project').attr('reponame');
+                var links = $(this).closest('div.l').find('a');
+                var tagProcessed = 0;
+                var updateTag = function( tagName, commit ) {
+                    // project name is hardcoded !!!!
+                    var url = 'https://strictweb.com/stash/rest/git/latest/projects/FX/repos/'+reponame+'/tags';
+                    $.ajax({ type: "DELETE", url: url + '/'+tagName, complete: function() {
+                        $.ajax({ type: "POST", url: url, dataType: "json", contentType: "application/json",
+                            data: '{"message":"","name":"'+tagName+'","startPoint":"'+commit+'","type":"LIGHTWEIGHT"}',
+                            complete: function() {
+                                if (++tagProcessed == 2) window.open($(links.get(4)).attr("href"),'_blank').focus();
+                            }
+                        });
+                    }});
+                }
+                updateTag( $(links.get(0)).text(), $(links.get(1)).text() )
+                updateTag( $(links.get(2)).text(), $(links.get(3)).text() )
+                return false;
+            });
         });
         $("#versions select.project").change();
     });

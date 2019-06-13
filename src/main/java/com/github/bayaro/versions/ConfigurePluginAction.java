@@ -23,7 +23,6 @@ public class ConfigurePluginAction extends GlobalAdminAction {
         storageUsr = String.valueOf( bandanaManager.getValue( PlanAwareBandanaContext.GLOBAL_CONTEXT, BANDANA_KEY_STORAGE_USR ) );
         storagePwd = String.valueOf( bandanaManager.getValue( PlanAwareBandanaContext.GLOBAL_CONTEXT, BANDANA_KEY_STORAGE_PWD ) );
         return INPUT;
-
     }
 
     public String getErrorMessage() {
