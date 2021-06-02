@@ -23,6 +23,7 @@ import com.atlassian.bandana.BandanaManager;
 import com.atlassian.bamboo.user.BambooAuthenticationContext;
 import com.atlassian.bamboo.plan.*;
 import com.atlassian.user.User;
+import com.atlassian.bamboo.vcs.configuration.*;
 
 public class PrepareVersionsForm extends BambooActionSupport {
 
@@ -42,6 +43,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private KnownEnvironmentBuilds buildsList;
     private Map<String, List<String>> deployedVersions;
     private Map<String, Set<String>> branches = new HashMap<>();
+    private Map<String, String> reponames = new HashMap<>();
 
     private Pattern patternRpm = Pattern.compile( "^<a href=\"([^\"]*)-([^\"-]*)-([^\"-]*)\\.x86_64\\.rpm\">.*" );
     private Pattern patternBranch = Pattern.compile( "^([^\\.]*)\\.([0-9a-f]*)$" );
@@ -54,6 +56,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private BambooAuthenticationContext bambooAuthenticationContext;
     private PlanManager planManager;
     private PlanExecutionManager planExecutionManager;
+    private User user;
 
     @SuppressWarnings("unused")
     public String getBaseUrl() { return baseUrl; }
@@ -70,6 +73,8 @@ public class PrepareVersionsForm extends BambooActionSupport {
     public String getReleaseName() { return releaseName; }
     @SuppressWarnings("unused")
     public TopLevelPlan getBuildPlan() { return buildPlan; }
+    @SuppressWarnings("unused")
+    public String getUsername() { return user.getName(); }
 
     @SuppressWarnings("unused")
     public Map<String, String> getChoosen() { return choosen; }
@@ -89,6 +94,8 @@ public class PrepareVersionsForm extends BambooActionSupport {
         this.bambooAuthenticationContext = bambooAuthenticationContext;
         this.planManager = planManager;
         this.planExecutionManager = planExecutionManager;
+
+        user = bambooAuthenticationContext.getUser();
     }
 
     private void logg( Object o ) {
@@ -116,8 +123,6 @@ public class PrepareVersionsForm extends BambooActionSupport {
             errorMessage = "Please, describe the release!";
             return Action.SUCCESS;
         }
-
-        User user = bambooAuthenticationContext.getUser();
 
         Map<String,String> params = new HashMap<String, String>();
         Map<String,String> vars = new HashMap<String, String>();
@@ -188,10 +193,13 @@ public class PrepareVersionsForm extends BambooActionSupport {
     public KnownEnvironmentBuilds getBuildsList() {
         return buildsList;
     }
-
     @SuppressWarnings("unused")
     public Map<String, Set<String>> getBranches() {
         return branches;
+    }
+    @SuppressWarnings("unused")
+    public Map<String, String> getReponames() {
+        return reponames;
     }
 
     static public List<String> loadURL( String path, String storageUrl, String storageUsr, String storagePwd ) {
@@ -240,6 +248,7 @@ public class PrepareVersionsForm extends BambooActionSupport {
     private void prepareAllKnownBuilds() {
         KnownEnvironmentBuilds builds = new KnownEnvironmentBuilds( "builds" );
         Map<String, Set<String>> branches = new TreeMap();
+        Map<String, String> reponames = new HashMap();
         List<String> htmlBuilds = loadURL( "/builds" );
         Collections.sort( htmlBuilds, Collections.reverseOrder());
 
@@ -267,6 +276,17 @@ public class PrepareVersionsForm extends BambooActionSupport {
         this.branches = branches;
         builds.sort();
         this.buildsList = builds;
+
+        List<TopLevelPlan> plans = planManager.getAllPlans();
+        for ( TopLevelPlan p : plans ) {
+            if ( ! p.getProject().getName().equals( dep2proj ) ) continue;
+			String pName = "fx-" + p.getName().replaceAll( "^" + dep2proj + " - build.", "" );
+			if ( ! builds.getProjects().containsKey( pName ) ) continue;
+
+			List<PlanRepositoryDefinition> reposList = p.getPlanRepositoryDefinitions();
+			reponames.put( pName, ( reposList.size() > 0 ) ? reposList.get(0).getName() : "undefined" );
+        }
+        this.reponames = reponames;
     }
 
     @SuppressWarnings("unused")

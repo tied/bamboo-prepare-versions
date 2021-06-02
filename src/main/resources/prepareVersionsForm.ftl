@@ -8,7 +8,6 @@ ${webResourceManager.requireResource("com.github.bayaro.versions.prepare-version
         </script>
     [/#if]
 
-
 <div class="plugin-prepare-versions-container" data-provide="plugin-prepare-versions-page" data-page="form">
 
   <h1>${i18n.getText('prepare-versions.plugin.name')}</h1>
@@ -19,7 +18,7 @@ ${webResourceManager.requireResource("com.github.bayaro.versions.prepare-version
 
   [#if environmentsList?has_content]
 
-    <form id="versions">
+    <form id="versions" username="${username}">
       <input type="hidden" name="planKey" value="[#if buildPlan??]${buildPlan.getPlanKey()}[/#if]">
       <fieldset>
 
@@ -61,15 +60,19 @@ ${webResourceManager.requireResource("com.github.bayaro.versions.prepare-version
       <tbody>
         [#list buildsList.projects?keys as k]
         <tr>
-          <td><a _target="blank" href="${baseUrl}/bamboo/browse/${buildsList.projects[k].name}">${k}</a></td>
-            <td><select class="select project" name="${k}">
+            <td><a _target="blank" href="${baseUrl}/bamboo/browse/${buildsList.projects[k].name}">${k}</a></td>
+            <td><select class="select project" name="${k}" reponame="[#if reponames[k]??]${reponames[k]}[/#if]">
               [#list buildsList.projects[k].branches?keys as b]
                 <option value="branch-${b}" disabled>${b}</option>
                 [#list buildsList.projects[k].branches[b] as v]
                   <option value="${v}" [#if (choosen[k]?? && v == choosen[k]) || (deployedVersions[k+"-"+v]?? && (deployedVersions[k+"-"+v].contains(dep2env + "?") || deployedVersions[k+"-"+v].contains(dep2env)))] selected [/#if]>[#if deployedVersions[k+"-"+v]??]${deployedVersions[k+"-"+v]} [/#if]${v}</option>
                 [/#list]
               [/#list]
-            </select></td>
+            </select>
+            <a class="sc" show="${i18n.getText('prepare-versions.form.show-commits')}" hide="${i18n.getText('prepare-versions.form.hide-commits')}"></a>
+            <iframe></iframe>
+            <div class="l"></div>
+            </td>
         </tr>
         [/#list]
       </tbody>
